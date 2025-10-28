@@ -40,18 +40,13 @@ const variants = {
   }),
 };
 
-// New wrapper component to solve hydration issues
-const PageWrapper = forwardRef<HTMLDivElement, { children: React.ReactNode, onPanEnd: (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void }>(
-    ({ children, onPanEnd }, ref) => {
+// Simplified wrapper component to solve hydration issues
+const PageWrapper = forwardRef<HTMLDivElement, { children: React.ReactNode }>(
+    ({ children }, ref) => {
         return (
-            <motion.div
-                ref={ref}
-                onPanEnd={onPanEnd}
-                className="h-full w-full flex-1"
-                style={{ touchAction: 'pan-y' }}
-            >
+            <div ref={ref} className="h-full w-full flex-1" style={{ touchAction: 'pan-y' }}>
                 {children}
-            </motion.div>
+            </div>
         );
     }
 );
@@ -68,7 +63,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [avatarPreview, setAvatarPreview] = useState<ProfileAvatarPreviewState>(null);
   const isAvatarPreviewOpen = !!avatarPreview;
   
-  const contentRef = useRef<HTMLDivElement>(null);
   const [direction, setDirection] = useState(0);
   const searchParams = useSearchParams().toString();
   const prevPathnameRef = useRef(pathname);
@@ -231,12 +225,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={{ setAvatarPreview: handleSetAvatarPreview, isAvatarPreviewOpen }}>
       <div 
-        ref={contentRef}
         className={cn("h-full md:max-w-md md:mx-auto md:border-x flex flex-col overflow-hidden")}
       >
         <AnimatePresence initial={false} custom={direction}>
             <motion.div
                  key={pathname + searchParams}
+                 className="h-full w-full"
                  custom={direction}
                  variants={variants}
                  initial="enter"
@@ -246,9 +240,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     x: { type: "spring", stiffness: 300, damping: 30 },
                     opacity: { duration: 0.2 }
                  }}
-                 className="h-full w-full"
+                 onPanEnd={handlePanEnd}
             >
-                <PageWrapper onPanEnd={handlePanEnd}>
+                <PageWrapper>
                     {children}
                 </PageWrapper>
             </motion.div>
