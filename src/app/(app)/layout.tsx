@@ -1,9 +1,9 @@
 
 'use client'
 
-import React, { useState, useContext, useEffect, useRef } from 'react'
+import React, { useState, useContext, useEffect, useRef, forwardRef } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { AnimatePresence, motion, useDragControls } from 'framer-motion'
+import { AnimatePresence, motion, useDragControls, PanInfo } from 'framer-motion'
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase'
 import { doc, onSnapshot, updateDoc, collection, query, orderBy, Timestamp, limit, getDocs, serverTimestamp as firestoreServerTimestamp, setDoc } from 'firebase/firestore'
 import { cn } from '@/lib/utils'
@@ -40,6 +40,24 @@ const variants = {
   }),
 };
 
+// New wrapper component to solve hydration issues
+const PageWrapper = forwardRef<HTMLDivElement, { children: React.ReactNode, onPanEnd: (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void }>(
+    ({ children, onPanEnd }, ref) => {
+        return (
+            <motion.div
+                ref={ref}
+                onPanEnd={onPanEnd}
+                className="h-full w-full flex-1"
+                style={{ touchAction: 'pan-y' }}
+            >
+                {children}
+            </motion.div>
+        );
+    }
+);
+PageWrapper.displayName = 'PageWrapper';
+
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { firestore, user } = useFirebase();
   const router = useRouter();
@@ -53,6 +71,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const [direction, setDirection] = useState(0);
   const searchParams = useSearchParams().toString();
+  const prevPathnameRef = useRef(pathname);
+
+  useEffect(() => {
+    const currentIndex = pageOrder.indexOf(pathname);
+    const prevIndex = pageOrder.indexOf(prevPathnameRef.current);
+    if (currentIndex !== -1 && prevIndex !== -1) {
+        setDirection(currentIndex > prevIndex ? 1 : -1);
+    }
+    prevPathnameRef.current = pathname;
+  }, [pathname]);
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -179,24 +207,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       setAvatarPreview(preview);
   }
 
-  const handlePanEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number; y: number }, velocity: { x: number; y: number } }) => {
-    // Check if swipe is more horizontal than vertical to avoid interfering with scrolling
+  const handlePanEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (Math.abs(info.offset.x) < Math.abs(info.offset.y)) {
         return;
     }
 
-    const swipeThreshold = 50; // Minimum distance for a swipe
-    const velocityThreshold = 400; // Minimum velocity for a flick
+    const swipeThreshold = 50; 
+    const velocityThreshold = 400; 
     const swipe = info.offset.x;
     const velocity = info.velocity.x;
     const currentIndex = pageOrder.indexOf(pathname);
     
-    // Swipe right (previous page)
     if ((swipe > swipeThreshold || velocity > velocityThreshold) && currentIndex > 0) {
         setDirection(-1);
         router.push(pageOrder[currentIndex - 1]);
     } 
-    // Swipe left (next page)
     else if ((swipe < -swipeThreshold || velocity < -velocityThreshold) && currentIndex < pageOrder.length - 1) {
         setDirection(1);
         router.push(pageOrder[currentIndex + 1]);
@@ -211,21 +236,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       >
         <AnimatePresence initial={false} custom={direction}>
             <motion.div
-                key={pathname + searchParams}
-                className="h-full w-full flex-1"
-                custom={direction}
-                variants={variants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
+                 key={pathname + searchParams}
+                 custom={direction}
+                 variants={variants}
+                 initial="enter"
+                 animate="center"
+                 exit="exit"
+                 transition={{
                     x: { type: "spring", stiffness: 300, damping: 30 },
                     opacity: { duration: 0.2 }
-                }}
-                onPanEnd={handlePanEnd}
-                style={{ touchAction: 'pan-y' }}
+                 }}
+                 className="h-full w-full"
             >
-              {children}
+                <PageWrapper onPanEnd={handlePanEnd}>
+                    {children}
+                </PageWrapper>
             </motion.div>
         </AnimatePresence>
       </div>
