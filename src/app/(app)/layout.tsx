@@ -179,24 +179,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       setAvatarPreview(preview);
   }
 
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number; y: number }, velocity: { x: number; y: number } }) => {
-    // Check if swipe is more horizontal than vertical
+  const handlePanEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number; y: number }, velocity: { x: number; y: number } }) => {
+    // Check if swipe is more horizontal than vertical to avoid interfering with scrolling
     if (Math.abs(info.offset.x) < Math.abs(info.offset.y)) {
         return;
     }
 
-    const swipeThreshold = 50;
+    const swipeThreshold = 50; // Minimum distance for a swipe
+    const velocityThreshold = 400; // Minimum velocity for a flick
+    const swipe = info.offset.x;
+    const velocity = info.velocity.x;
     const currentIndex = pageOrder.indexOf(pathname);
-    if (info.offset.x > swipeThreshold) { // Swipe right
-      if (currentIndex > 0) {
+    
+    // Swipe right (previous page)
+    if ((swipe > swipeThreshold || velocity > velocityThreshold) && currentIndex > 0) {
         setDirection(-1);
         router.push(pageOrder[currentIndex - 1]);
-      }
-    } else if (info.offset.x < -swipeThreshold) { // Swipe left
-      if (currentIndex < pageOrder.length - 1) {
+    } 
+    // Swipe left (next page)
+    else if ((swipe < -swipeThreshold || velocity < -velocityThreshold) && currentIndex < pageOrder.length - 1) {
         setDirection(1);
         router.push(pageOrder[currentIndex + 1]);
-      }
     }
   };
 
@@ -219,11 +222,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     x: { type: "spring", stiffness: 300, damping: 30 },
                     opacity: { duration: 0.2 }
                 }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.2}
-                onDragEnd={handleDragEnd}
-                // This style is crucial to prevent interference with vertical scrolling
+                onPanEnd={handlePanEnd}
                 style={{ touchAction: 'pan-y' }}
             >
               {children}
