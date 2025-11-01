@@ -5,7 +5,10 @@ import {
   doc,
   setDoc,
   updateDoc,
+  addDoc,
+  collection,
   DocumentReference,
+  CollectionReference,
   SetOptions,
   UpdateData,
 } from 'firebase/firestore';
@@ -62,4 +65,28 @@ export function updateDocumentNonBlocking(
       throw error;
     });
   return promise;
+}
+
+/**
+ * Initiates an addDoc operation for a collection reference.
+ * Does NOT await the write operation internally but returns the promise.
+ * Catches permission errors and emits them.
+ */
+export function addDocumentNonBlocking(
+  collectionRef: CollectionReference,
+  data: any
+) {
+    const promise = addDoc(collectionRef, data)
+        .catch(error => {
+            errorEmitter.emit(
+                'permission-error',
+                new FirestorePermissionError({
+                    path: collectionRef.path,
+                    operation: 'create',
+                    requestResourceData: data,
+                })
+            );
+            throw error;
+        });
+    return promise;
 }
