@@ -47,7 +47,8 @@ export function DesktopAccessGate({ children }: { children: ReactNode }) {
       
       const link = `${window.location.origin}/chats`;
       setConnectionLink(link);
-      setQrCodeUrl(`https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(link)}&bgcolor=111827`);
+      // Use a light QR code color (F1F5F9) and a transparent background
+      setQrCodeUrl(`https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(link)}&color=F1F5F9&bgcolor=FFFFFF&qzone=1`);
     };
 
     checkAccess();
