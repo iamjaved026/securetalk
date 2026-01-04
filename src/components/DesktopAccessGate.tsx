@@ -45,10 +45,9 @@ export function DesktopAccessGate({ children }: { children: ReactNode }) {
       }
       setIsChecking(false);
       
-      const link = `${window.location.origin}/chats`;
+      const link = `https://securetalkbeta.vercel.app`;
       setConnectionLink(link);
-      // Use a light QR code color (F1F5F9) and a transparent background
-      setQrCodeUrl(`https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(link)}&color=F1F5F9&bgcolor=FFFFFF&qzone=1`);
+      setQrCodeUrl(`https://res.cloudinary.com/dgzgnj8jy/image/upload/v1767506936/frame_aihcej.png`);
     };
 
     checkAccess();
