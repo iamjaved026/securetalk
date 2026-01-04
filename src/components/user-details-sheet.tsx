@@ -196,11 +196,10 @@ export function UserDetailsSheet({ open, onOpenChange, contact, messages }: User
                 </div>
 
                 <Tabs defaultValue="images" className="w-full mt-4">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="images">Images</TabsTrigger>
                     <TabsTrigger value="videos">Videos</TabsTrigger>
                     <TabsTrigger value="docs">Docs</TabsTrigger>
-                    <TabsTrigger value="links">Links</TabsTrigger>
                   </TabsList>
                   <TabsContent value="images" className="mt-4">
                      {sharedMedia.images.length > 0 ? (
@@ -245,23 +244,6 @@ export function UserDetailsSheet({ open, onOpenChange, contact, messages }: User
                         ))
                     ) : (
                          <EmptyState icon={FileUp} text="No documents shared yet." />
-                    )}
-                  </TabsContent>
-                  <TabsContent value="links" className="mt-4 space-y-2">
-                    {sharedMedia.links.length > 0 ? (
-                        sharedMedia.links.map((link, i) => (
-                            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center p-3 bg-muted rounded-lg hover:bg-muted/80">
-                                <div className="p-2 bg-background rounded-md mr-3 shrink-0">
-                                    <LinkIcon className="w-6 h-6" />
-                                </div>
-                                <div className="overflow-hidden">
-                                <p className="font-semibold text-sm truncate">{link.title}</p>
-                                <p className="text-xs text-primary break-all">{link.url}</p>
-                                </div>
-                            </a>
-                        ))
-                    ) : (
-                         <EmptyState icon={Globe} text="No links shared yet." />
                     )}
                   </TabsContent>
                 </Tabs>
