@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast'
 import type { Contact, Message } from '@/lib/types'
 import { playTone, tones } from '@/lib/audio'
 import { ProfileAvatarPreview, type ProfileAvatarPreviewState } from '@/components/profile-avatar-preview'
+import { DesktopAccessGate } from '@/components/DesktopAccessGate'
 
 // Create a context to share the avatar preview state
 export const AppContext = React.createContext<{
@@ -40,18 +41,6 @@ const variants = {
   }),
 };
 
-// Simplified wrapper component to solve hydration issues
-const PageWrapper = forwardRef<HTMLDivElement, { children: React.ReactNode }>(
-    ({ children }, ref) => {
-        return (
-            <div ref={ref} className="h-full w-full flex-1" style={{ touchAction: 'pan-y' }}>
-                {children}
-            </div>
-        );
-    }
-);
-PageWrapper.displayName = 'PageWrapper';
-
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { firestore, user } = useFirebase();
@@ -66,6 +55,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [direction, setDirection] = useState(0);
   const searchParams = useSearchParams().toString();
   const prevPathnameRef = useRef(pathname);
+  
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     const currentIndex = pageOrder.indexOf(pathname);
@@ -224,30 +218,35 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={{ setAvatarPreview: handleSetAvatarPreview, isAvatarPreviewOpen }}>
-      <div 
-        className={cn("h-full md:max-w-md md:mx-auto md:border-x flex flex-col overflow-hidden")}
-      >
-        <AnimatePresence initial={false} custom={direction}>
-            <motion.div
-                 key={pathname + searchParams}
-                 className="h-full w-full"
-                 custom={direction}
-                 variants={variants}
-                 initial="enter"
-                 animate="center"
-                 exit="exit"
-                 transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 }
-                 }}
-                 onPanEnd={handlePanEnd}
-            >
-                <PageWrapper>
-                    {children}
-                </PageWrapper>
-            </motion.div>
-        </AnimatePresence>
-      </div>
+      <DesktopAccessGate>
+        <div className="h-full md:max-w-md md:mx-auto md:border-x flex flex-col overflow-hidden">
+            {hasMounted ? (
+                <AnimatePresence initial={false} custom={direction}>
+                    <motion.div
+                        key={pathname + searchParams}
+                        className="h-full w-full"
+                        custom={direction}
+                        variants={variants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        transition={{
+                            x: { type: "spring", stiffness: 300, damping: 30 },
+                            opacity: { duration: 0.2 }
+                        }}
+                        onPanEnd={handlePanEnd}
+                        style={{ touchAction: 'pan-y' }}
+                    >
+                        <div className="h-full w-full flex flex-col">
+                          {children}
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
+            ) : (
+                 <div className="h-full w-full flex flex-col">{children}</div>
+            )}
+        </div>
+      </DesktopAccessGate>
       <ProfileAvatarPreview
           preview={avatarPreview}
           onOpenChange={(isOpen) => {
