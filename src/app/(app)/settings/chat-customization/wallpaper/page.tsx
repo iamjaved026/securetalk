@@ -11,7 +11,6 @@ import { ChatWallpapers } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/firebase';
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 function ChatPreview() {
@@ -48,7 +47,7 @@ export default function WallpaperPage() {
     const [isSaving, setIsSaving] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
-    const { storage, user } = useFirebase();
+    const { user } = useFirebase();
     
     const defaultWallpaper = null; // No background image by default
 
@@ -76,11 +75,11 @@ export default function WallpaperPage() {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        if (file.size > 4 * 1024 * 1024) { // 4MB limit
             toast({
                 variant: 'destructive',
                 title: 'Image too large',
-                description: 'Please select an image smaller than 5MB.'
+                description: 'Please select an image smaller than 4MB.'
             });
             return;
         }
@@ -106,8 +105,8 @@ export default function WallpaperPage() {
     };
     
     const handleSave = async () => {
-        if (!user || !storage) {
-            toast({ variant: 'destructive', title: 'Error', description: 'User not authenticated or storage not available.' });
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Error', description: 'User not authenticated.' });
             return;
         }
 
@@ -116,9 +115,15 @@ export default function WallpaperPage() {
             let finalUrlToSave = selectedWallpaper;
 
             if (selectedWallpaper && selectedWallpaper.startsWith('data:image')) {
-                 const storageRef = ref(storage, `wallpapers/global/${user.uid}/${Date.now()}.jpeg`);
-                 const snapshot = await uploadString(storageRef, selectedWallpaper, 'data_url');
-                 finalUrlToSave = await getDownloadURL(snapshot.ref);
+                 const response = await fetch(selectedWallpaper);
+                 const blob = await response.blob();
+                 const uploadResponse = await fetch(`/api/upload?filename=global-wallpaper-${user.uid}.jpg`, {
+                   method: 'POST',
+                   body: blob,
+                 });
+                 if (!uploadResponse.ok) throw new Error('Upload failed');
+                 const { url } = await uploadResponse.json();
+                 finalUrlToSave = url;
                  localStorage.setItem('customGlobalWallpaper', finalUrlToSave);
             } else if (selectedWallpaper === null) {
                 // If user is selecting the default (no wallpaper), remove the custom one

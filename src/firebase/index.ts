@@ -5,7 +5,6 @@ import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
 
 // --- Start of Centralized Initialization ---
 
@@ -18,9 +17,8 @@ if (!getApps().length) {
 
 const auth = getAuth(firebaseApp);
 const firestore = getFirestore(firebaseApp);
-const storage = getStorage(firebaseApp);
 
-export { firebaseApp, auth, firestore, storage };
+export { firebaseApp, auth, firestore };
 
 // --- End of Centralized Initialization ---
 

@@ -4,7 +4,7 @@
 import React, { type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 // Import the initialized services directly
-import { firebaseApp, auth, firestore, storage } from '@/firebase';
+import { firebaseApp, auth, firestore } from '@/firebase';
 
 interface FirebaseClientProviderProps {
   children: ReactNode;
@@ -18,7 +18,6 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
       firebaseApp={firebaseApp}
       auth={auth}
       firestore={firestore}
-      storage={storage}
     >
       {children}
     </FirebaseProvider>

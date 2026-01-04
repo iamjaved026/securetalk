@@ -13,13 +13,11 @@ import { useToast } from '@/hooks/use-toast'
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase'
 import { doc, getDocs, collection, writeBatch } from 'firebase/firestore'
 import { ImageCropperDialog } from '@/components/image-cropper-dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { AppContext } from '@/app/(app)/layout'
-import { ref, uploadString, getDownloadURL } from 'firebase/storage'
 
 export default function EditProfilePage() {
   const { toast } = useToast()
-  const { firestore, user, storage } = useFirebase();
+  const { firestore, user } = useFirebase();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setAvatarPreview } = useContext(AppContext);
 
@@ -112,11 +110,11 @@ export default function EditProfilePage() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 4 * 1024 * 1024) { // 4MB limit for Vercel Hobby tier
         toast({
           variant: "destructive",
           title: "Image too large",
-          description: "Please select an image smaller than 5MB.",
+          description: "Please select an image smaller than 4MB.",
         });
         return;
       }
@@ -131,10 +129,19 @@ export default function EditProfilePage() {
   };
   
   const uploadCroppedImage = async (croppedImage: string): Promise<string> => {
-    if (!storage || !user) throw new Error("Storage not available");
-    const storageRef = ref(storage, `avatars/${user.uid}/profile.jpeg`);
-    const snapshot = await uploadString(storageRef, croppedImage, 'data_url', { contentType: 'image/jpeg' });
-    return getDownloadURL(snapshot.ref);
+    const response = await fetch(croppedImage);
+    const blob = await response.blob();
+    
+    const uploadResponse = await fetch(`/api/upload?filename=avatar-${user?.uid}.jpg`, {
+      method: 'POST',
+      body: blob,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error('Upload failed');
+    }
+    const { url } = await uploadResponse.json();
+    return url;
   };
 
   const handleAvatarClick = () => {

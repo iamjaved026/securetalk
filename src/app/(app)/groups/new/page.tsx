@@ -13,7 +13,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase, errorEmitter, FirestorePermissionError } from '@/firebase';
-import { ref, uploadBytes, getDownloadURL, uploadString } from 'firebase/storage';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ImageCropperDialog } from '@/components/image-cropper-dialog';
 import { collection, doc, setDoc, addDoc, Timestamp, writeBatch, serverTimestamp } from 'firebase/firestore';
@@ -21,7 +20,7 @@ import { collection, doc, setDoc, addDoc, Timestamp, writeBatch, serverTimestamp
 export default function NewGroupPage() {
   const { toast } = useToast();
   const router = useRouter();
-  const { user, storage, firestore } = useFirebase();
+  const { user, firestore } = useFirebase();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -106,7 +105,7 @@ export default function NewGroupPage() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 4 * 1024 * 1024) { // 4MB limit
         toast({ variant: "destructive", title: "Image too large" });
         return;
       }
@@ -118,26 +117,19 @@ export default function NewGroupPage() {
   };
   
   const uploadCroppedImage = async (croppedImage: string): Promise<string> => {
-    if (!storage || !user) throw new Error("Storage not available");
-  
-    return new Promise((resolve, reject) => {
-      fetch(croppedImage)
-        .then(res => res.blob())
-        .then(async (blob) => {
-           if (!blob) {
-            return reject(new Error('Canvas to Blob conversion failed'));
-          }
-          const storageRef = ref(storage, `group-avatars/${Date.now()}.jpeg`);
-          try {
-            const snapshot = await uploadBytes(storageRef, blob);
-            const downloadURL = await getDownloadURL(snapshot.ref);
-            resolve(downloadURL);
-          } catch (error) {
-            reject(error);
-          }
-        })
-        .catch(reject);
+    const response = await fetch(croppedImage);
+    const blob = await response.blob();
+    
+    const uploadResponse = await fetch(`/api/upload?filename=group-avatar-${Date.now()}.jpg`, {
+      method: 'POST',
+      body: blob,
     });
+
+    if (!uploadResponse.ok) {
+      throw new Error('Upload failed');
+    }
+    const { url } = await uploadResponse.json();
+    return url;
   };
 
   return (

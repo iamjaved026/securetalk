@@ -19,7 +19,6 @@ import { Card } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ImageCropperDialog } from '@/components/image-cropper-dialog';
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import Image from 'next/image';
 
 
@@ -102,7 +101,7 @@ function PasswordRequirement({ meets, text }: { meets: boolean; text: string }) 
 }
 
 const CreateAccountStep = ({ onNext, onBack, isSaving }: { onNext: (username: string, fullName: string, password: string, avatar: string) => void; onBack: () => void; isSaving: boolean; }) => {
-    const { firestore, user, storage } = useFirebase();
+    const { firestore, user } = useFirebase();
     const { toast } = useToast();
     const [username, setUsername] = useState('');
     const [fullName, setFullName] = useState('');
@@ -166,8 +165,8 @@ const CreateAccountStep = ({ onNext, onBack, isSaving }: { onNext: (username: st
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                toast({ variant: 'destructive', title: 'Image too large', description: 'Please select an image smaller than 5MB.' });
+            if (file.size > 4 * 1024 * 1024) { // 4MB limit
+                toast({ variant: 'destructive', title: 'Image too large', description: 'Please select an image smaller than 4MB.' });
                 return;
             }
             const reader = new FileReader();
@@ -178,11 +177,19 @@ const CreateAccountStep = ({ onNext, onBack, isSaving }: { onNext: (username: st
     };
 
     const uploadCroppedImage = async (croppedImage: string): Promise<string> => {
-        if (!storage) throw new Error("Storage not available");
-        const tempUserId = user?.uid || `temp_user_${Date.now()}`;
-        const storageRef = ref(storage, `avatars/${tempUserId}/profile.jpeg`);
-        const snapshot = await uploadString(storageRef, croppedImage, 'data_url', { contentType: 'image/jpeg' });
-        return getDownloadURL(snapshot.ref);
+        const response = await fetch(croppedImage);
+        const blob = await response.blob();
+        
+        const uploadResponse = await fetch(`/api/upload?filename=avatar-temp-${Date.now()}.jpg`, {
+          method: 'POST',
+          body: blob,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Upload failed');
+        }
+        const { url } = await uploadResponse.json();
+        return url;
     };
 
 
