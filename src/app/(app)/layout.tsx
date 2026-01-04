@@ -1,17 +1,14 @@
 
 'use client'
 
-import React, { useState, useContext, useEffect, useRef, forwardRef } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { AnimatePresence, motion, useDragControls, PanInfo } from 'framer-motion'
+import React, { useState, useContext, useEffect, useRef } from 'react'
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase'
 import { doc, onSnapshot, updateDoc, collection, query, orderBy, Timestamp, limit, getDocs, serverTimestamp as firestoreServerTimestamp, setDoc } from 'firebase/firestore'
-import { cn } from '@/lib/utils'
+import { useRouter, usePathname } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import type { Contact, Message } from '@/lib/types'
 import { playTone, tones } from '@/lib/audio'
 import { ProfileAvatarPreview, type ProfileAvatarPreviewState } from '@/components/profile-avatar-preview'
-import { DesktopAccessGate } from '@/components/DesktopAccessGate'
 
 // Create a context to share the avatar preview state
 export const AppContext = React.createContext<{
@@ -21,25 +18,6 @@ export const AppContext = React.createContext<{
   setAvatarPreview: () => {},
   isAvatarPreviewOpen: false,
 });
-
-const pageOrder = ['/chats', '/calls', '/nearby'];
-
-const variants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? '100%' : '-100%',
-    opacity: 0,
-  }),
-  center: {
-    zIndex: 1,
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    zIndex: 0,
-    x: direction < 0 ? '100%' : '-100%',
-    opacity: 0,
-  }),
-};
 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -52,24 +30,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [avatarPreview, setAvatarPreview] = useState<ProfileAvatarPreviewState>(null);
   const isAvatarPreviewOpen = !!avatarPreview;
   
-  const [direction, setDirection] = useState(0);
-  const searchParams = useSearchParams().toString();
-  const prevPathnameRef = useRef(pathname);
-  
-  const [hasMounted, setHasMounted] = useState(false);
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const currentIndex = pageOrder.indexOf(pathname);
-    const prevIndex = pageOrder.indexOf(prevPathnameRef.current);
-    if (currentIndex !== -1 && prevIndex !== -1) {
-        setDirection(currentIndex > prevIndex ? 1 : -1);
-    }
-    prevPathnameRef.current = pathname;
-  }, [pathname]);
-
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
@@ -195,58 +155,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       setAvatarPreview(preview);
   }
 
-  const handlePanEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (Math.abs(info.offset.x) < Math.abs(info.offset.y)) {
-        return;
-    }
-
-    const swipeThreshold = 50; 
-    const velocityThreshold = 400; 
-    const swipe = info.offset.x;
-    const velocity = info.velocity.x;
-    const currentIndex = pageOrder.indexOf(pathname);
-    
-    if ((swipe > swipeThreshold || velocity > velocityThreshold) && currentIndex > 0) {
-        setDirection(-1);
-        router.push(pageOrder[currentIndex - 1]);
-    } 
-    else if ((swipe < -swipeThreshold || velocity < -velocityThreshold) && currentIndex < pageOrder.length - 1) {
-        setDirection(1);
-        router.push(pageOrder[currentIndex + 1]);
-    }
-  };
-
   return (
     <AppContext.Provider value={{ setAvatarPreview: handleSetAvatarPreview, isAvatarPreviewOpen }}>
-      <DesktopAccessGate>
-        <div className="h-full md:max-w-md md:mx-auto md:border-x flex flex-col overflow-hidden">
-            {hasMounted ? (
-                <AnimatePresence initial={false} custom={direction}>
-                    <motion.div
-                        key={pathname + searchParams}
-                        className="h-full w-full"
-                        custom={direction}
-                        variants={variants}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{
-                            x: { type: "spring", stiffness: 300, damping: 30 },
-                            opacity: { duration: 0.2 }
-                        }}
-                        onPanEnd={handlePanEnd}
-                        style={{ touchAction: 'pan-y' }}
-                    >
-                        <div className="h-full w-full flex flex-col">
-                          {children}
-                        </div>
-                    </motion.div>
-                </AnimatePresence>
-            ) : (
-                 <div className="h-full w-full flex flex-col">{children}</div>
-            )}
-        </div>
-      </DesktopAccessGate>
+      <div className="h-full flex flex-col">
+        {children}
+      </div>
       <ProfileAvatarPreview
           preview={avatarPreview}
           onOpenChange={(isOpen) => {

@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { FirebaseClientProvider } from '@/firebase';
 import './globals.css';
 import { Suspense } from 'react';
+import { DesktopAccessGate } from '@/components/DesktopAccessGate';
 
 const ptSans = PT_Sans({
   subsets: ['latin'],
@@ -101,7 +102,11 @@ export default function RootLayout({
             disableTransitionOnChange
         >
           <FirebaseClientProvider>
-            {children}
+            <DesktopAccessGate>
+              <div className="h-full md:max-w-md md:mx-auto md:border-x flex flex-col overflow-hidden">
+                {children}
+              </div>
+            </DesktopAccessGate>
           </FirebaseClientProvider>
           <Toaster />
         </ThemeProvider>
