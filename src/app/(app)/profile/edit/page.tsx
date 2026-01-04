@@ -58,6 +58,21 @@ export default function EditProfilePage() {
         toast({ variant: "destructive", title: "Error", description: "User not authenticated."});
         return;
     }
+    
+    // TEMPORARY DEBUGGING LOGIC
+    if (user.uid === 'Ysf0cXtN8zTxbqhmSjaUBSAz21v2') {
+        console.log("--- DEBUGGING USER CONTACTS ---");
+        console.log("Current User ID:", user.uid);
+        const myContactsQuery = collection(firestore, 'users', user.uid, 'contacts');
+        const querySnapshot = await getDocs(myContactsQuery);
+        console.log(`Found ${querySnapshot.size} contacts for this user.`);
+        querySnapshot.forEach((contactDoc) => {
+            console.log("Contact ID:", contactDoc.id, "Data:", contactDoc.data());
+        });
+        toast({ title: "Debug Info Logged", description: "Contact data has been printed to the browser console." });
+        return; // Stop execution to prevent the error
+    }
+    
     setIsSaving(true);
     const profileData = {
         name,
@@ -75,6 +90,7 @@ export default function EditProfilePage() {
         const myContactsQuery = collection(firestore, 'users', user.uid, 'contacts');
         const querySnapshot = await getDocs(myContactsQuery);
         querySnapshot.forEach((contactDoc) => {
+            // Check if the contact is a group before attempting to update
             if (!contactDoc.data().isGroup) {
                 const contactId = contactDoc.id;
                 // This is the reference to this user's profile inside a contact's subcollection
