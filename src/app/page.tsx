@@ -1,5 +1,8 @@
-import { redirect } from 'next/navigation';
+
+'use client';
+
+import { SplashScreen } from '@/components/splash-screen';
 
 export default function Home() {
-  redirect('/chats');
+  return <SplashScreen />;
 }
