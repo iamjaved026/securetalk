@@ -254,7 +254,7 @@ export function UserDetailsSheet({ open, onOpenChange, contact, messages }: User
                                 <div className="p-2 bg-background rounded-md mr-3">
                                     <LinkIcon className="w-6 h-6" />
                                 </div>
-                                <div className="overflow-hidden">
+                                <div className="flex-1 overflow-hidden">
                                 <p className="font-semibold text-sm truncate">{link.title}</p>
                                 <p className="text-xs text-primary break-all">{link.url}</p>
                                 </div>
