@@ -251,10 +251,10 @@ export function UserDetailsSheet({ open, onOpenChange, contact, messages }: User
                     {sharedMedia.links.length > 0 ? (
                         sharedMedia.links.map((link, i) => (
                             <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center p-3 bg-muted rounded-lg hover:bg-muted/80">
-                                <div className="p-2 bg-background rounded-md mr-3">
+                                <div className="p-2 bg-background rounded-md mr-3 shrink-0">
                                     <LinkIcon className="w-6 h-6" />
                                 </div>
-                                <div className="flex-1 overflow-hidden">
+                                <div className="overflow-hidden">
                                 <p className="font-semibold text-sm truncate">{link.title}</p>
                                 <p className="text-xs text-primary break-all">{link.url}</p>
                                 </div>
