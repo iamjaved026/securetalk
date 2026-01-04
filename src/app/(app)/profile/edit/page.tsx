@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useToast } from '@/hooks/use-toast'
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase'
-import { doc, getDocs, collection, writeBatch } from 'firebase/firestore'
+import { doc, getDocs, collection, writeBatch, getDoc } from 'firebase/firestore'
 import { ImageCropperDialog } from '@/components/image-cropper-dialog'
 import { AppContext } from '@/app/(app)/layout'
 
@@ -59,20 +59,6 @@ export default function EditProfilePage() {
         return;
     }
     
-    // TEMPORARY DEBUGGING LOGIC
-    if (user.uid === 'Ysf0cXtN8zTxbqhmSjaUBSAz21v2') {
-        console.log("--- DEBUGGING USER CONTACTS ---");
-        console.log("Current User ID:", user.uid);
-        const myContactsQuery = collection(firestore, 'users', user.uid, 'contacts');
-        const querySnapshot = await getDocs(myContactsQuery);
-        console.log(`Found ${querySnapshot.size} contacts for this user.`);
-        querySnapshot.forEach((contactDoc) => {
-            console.log("Contact ID:", contactDoc.id, "Data:", contactDoc.data());
-        });
-        toast({ title: "Debug Info Logged", description: "Contact data has been printed to the browser console." });
-        return; // Stop execution to prevent the error
-    }
-    
     setIsSaving(true);
     const profileData = {
         name,
@@ -89,19 +75,29 @@ export default function EditProfilePage() {
     try {
         const myContactsQuery = collection(firestore, 'users', user.uid, 'contacts');
         const querySnapshot = await getDocs(myContactsQuery);
-        querySnapshot.forEach((contactDoc) => {
-            // Check if the contact is a group before attempting to update
-            if (!contactDoc.data().isGroup) {
-                const contactId = contactDoc.id;
-                // This is the reference to this user's profile inside a contact's subcollection
-                const otherUserContactRef = doc(firestore, 'users', contactId, 'contacts', user.uid);
-                batch.update(otherUserContactRef, {
-                    name: name,
-                    avatar: avatar,
-                    bio: bio,
-                });
+        
+        for (const contactDoc of querySnapshot.docs) {
+            const contactData = contactDoc.data();
+            const contactId = contactDoc.id;
+
+            // Skip groups and check if the corresponding user exists
+            if (!contactData.isGroup) {
+                const otherUserDocRef = doc(firestore, 'users', contactId);
+                const otherUserDoc = await getDoc(otherUserDocRef);
+
+                // Only proceed if the other user's document actually exists
+                if (otherUserDoc.exists()) {
+                    const otherUserContactRef = doc(firestore, 'users', contactId, 'contacts', user.uid);
+                    batch.update(otherUserContactRef, {
+                        name: name,
+                        avatar: avatar,
+                        bio: bio,
+                    });
+                } else {
+                    console.warn(`Skipping update for non-existent contact: ${contactId}`);
+                }
             }
-        });
+        }
 
         await batch.commit();
 
