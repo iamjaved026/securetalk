@@ -1503,8 +1503,22 @@ export default function ChatPage() {
         if ((isSender && info.offset.x < dragThreshold) || (!isSender && info.offset.x > dragThreshold)) {
             handleReply(message);
         }
-        controls.start({ x: 0 });
+        // This causes a flicker on drag end, moving to useEffect
+        // controls.start({ x: 0 });
     };
+    
+    // This effect will run after the drag ends to reset the position.
+    useEffect(() => {
+        const unsubscribe = x.on('change', (latest) => {
+            if (latest === 0) return;
+            const isDragging = x.getVelocity() !== 0;
+            if (!isDragging) {
+               controls.start({ x: 0 });
+            }
+        });
+        return () => unsubscribe();
+    }, [x, controls]);
+
 
     const backgroundOpacity = useTransform(x, isSender ? [-100, 0] : [0, 100], [1, 0]);
     
