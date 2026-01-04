@@ -253,9 +253,9 @@ export function UserDetailsSheet({ open, onOpenChange, contact, messages }: User
                                 <div className="p-2 bg-background rounded-md mr-3">
                                     <LinkIcon className="w-6 h-6" />
                                 </div>
-                                <div>
+                                <div className="min-w-0">
                                 <p className="font-semibold text-sm line-clamp-1">{link.title}</p>
-                                <p className="text-xs text-primary line-clamp-1">{link.url}</p>
+                                <p className="text-xs text-primary line-clamp-1 break-all">{link.url}</p>
                                 </div>
                             </a>
                         ))
