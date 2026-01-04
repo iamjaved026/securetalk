@@ -256,7 +256,7 @@ export function UserDetailsSheet({ open, onOpenChange, contact, messages }: User
                                 </div>
                                 <div className="min-w-0">
                                 <p className="font-semibold text-sm line-clamp-1">{link.title}</p>
-                                <p className="text-xs text-primary line-clamp-1 break-all">{link.url}</p>
+                                <p className="text-xs text-primary break-all">{link.url}</p>
                                 </div>
                             </a>
                         ))
