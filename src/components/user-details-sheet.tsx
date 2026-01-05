@@ -13,12 +13,12 @@ import { FileText, Link as LinkIcon, Download, PlayCircle, BadgeCheck, Image as 
 
 import type { Contact, Message } from "@/lib/types"
 import { Badge } from "./ui/badge"
-import { useFirebase } from "@/firebase"
-import { updateDocumentNonBlocking } from "@/firebase"
+import { useFirebase, useDoc, useMemoFirebase } from "@/firebase"
 import { doc } from 'firebase/firestore'
 import { Input } from "./ui/input"
 import { useToast } from "@/hooks/use-toast"
 import { AppContext } from "@/app/(app)/layout"
+import { updateDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 
 
 type UserDetailsSheetProps = {
@@ -67,14 +67,14 @@ export function UserDetailsSheet({ open, onOpenChange, contact, messages }: User
     }
   };
   
-  const handleSaveName = () => {
+  const handleSaveName = async () => {
     if (!localContactDocRef) return;
     if (editedName.trim().length < 2) {
         toast({ variant: 'destructive', title: "Name is too short." });
         return;
     }
     setIsSaving(true);
-    updateDocumentNonBlocking(localContactDocRef, { displayName: editedName });
+    await updateDocumentNonBlocking(localContactDocRef, { displayName: editedName });
     toast({ title: "Contact name updated!" });
     setIsSaving(false);
     setIsEditing(false);
@@ -87,12 +87,14 @@ export function UserDetailsSheet({ open, onOpenChange, contact, messages }: User
 
   const statusText = React.useMemo(() => {
     if (contact.lastSeen) {
-        const lastSeenDate = contact.lastSeen.toDate();
-        const now = new Date();
-        const diffMinutes = differenceInMinutes(now, lastSeenDate);
+      const now = new Date();
+      const lastSeenDate = contact.lastSeen.toDate();
+      const diffMinutes = differenceInMinutes(now, lastSeenDate);
+      
+      if (diffMinutes < 1) return "Active now";
+      if (diffMinutes < 5) return `Active a few minutes ago`;
 
-        if (diffMinutes < 1) return 'Active now';
-        return `Active ${formatDistanceToNowStrict(lastSeenDate, { addSuffix: true })}`;
+      return `Active ${formatDistanceToNowStrict(lastSeenDate, { addSuffix: true })}`;
     }
     return 'Offline';
   }, [contact.lastSeen]);
@@ -192,7 +194,7 @@ export function UserDetailsSheet({ open, onOpenChange, contact, messages }: User
                 </div>
 
                 <Tabs defaultValue="images" className="w-full mt-4">
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid grid-cols-3">
                     <TabsTrigger value="images">Images</TabsTrigger>
                     <TabsTrigger value="videos">Videos</TabsTrigger>
                     <TabsTrigger value="docs">Docs</TabsTrigger>
