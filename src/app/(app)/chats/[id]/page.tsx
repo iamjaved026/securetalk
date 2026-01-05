@@ -1414,28 +1414,37 @@ export default function ChatPage() {
   const chatAvatar = group?.avatar || contact?.avatar;
 
   const getStatusText = () => {
-      if(isGroupChat) {
-          const onlineMembers = allUsers ? allUsers.filter(u => group?.participants[u.id] && u.status === 'online').length : 0;
-          const totalMembers = Object.values(group?.participants || {}).filter(v => v).length;
-          return `${totalMembers} members, ${onlineMembers} online`;
-      }
-      if (chat?.typing?.[contactId || '']) {
+    if (isGroupChat) {
+      const onlineMembers = allUsers
+        ? allUsers.filter((u) => group?.participants[u.id] && u.status === 'online').length
+        : 0;
+      const totalMembers = Object.values(group?.participants || {}).filter(
+        (v) => v
+      ).length;
+      return `${totalMembers} members, ${onlineMembers} online`;
+    }
+
+    if (chat?.typing?.[contactId || '']) {
         return <span className="text-primary animate-pulse">Typing...</span>;
-      }
-      if (remoteUser?.status === 'online') {
+    }
+
+    if (remoteUser?.status === 'online') {
         return 'Active now';
-      }
-      if (remoteUser?.lastSeen) {
-        const minsSinceLastSeen = differenceInMinutes(new Date(), remoteUser.lastSeen.toDate());
-        if (minsSinceLastSeen < 1) {
-          return 'Active just now';
-        }
-        if (minsSinceLastSeen <= 5) {
-          return `Active a few minutes ago`;
-        }
-      }
-      return '';
-  }
+    }
+
+    if (remoteUser?.lastSeen) {
+        const lastSeenDate = remoteUser.lastSeen.toDate();
+        const now = new Date();
+        const diffMinutes = differenceInMinutes(now, lastSeenDate);
+
+        if (diffMinutes < 1) return 'Active now';
+        if (diffMinutes <= 5) return 'Active a few minutes ago';
+        return `Active ${formatDistanceToNowStrict(lastSeenDate, { addSuffix: true })}`;
+    }
+    
+    return 'Offline';
+};
+
 
   const handleScrollToMessage = (messageId: string) => {
     const messageElement = messageRefs.current[messageId];
