@@ -152,7 +152,7 @@ export function DesktopAccessGate({ children }: { children: ReactNode }) {
               <h3 className="text-xl font-bold text-center">Open on Mobile</h3>
               {qrCodeUrl ? (
                 <div className="bg-white p-4 rounded-lg">
-                  <Image src={qrCodeUrl} alt="QR Code to open mobile app" width={256} height={256} />
+                  <Image src={qrCodeUrl} alt="QR Code to open mobile app" width={256} height={256} priority />
                 </div>
               ) : (
                 <div className="w-64 h-64 bg-white/10 rounded-lg flex items-center justify-center">

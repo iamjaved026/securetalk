@@ -26,6 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { toast } = useToast();
   const lastTimestampsRef = React.useRef<Map<string, Timestamp>>(new Map());
+  const consoleMessageLogged = useRef(false);
 
   const [avatarPreview, setAvatarPreview] = useState<ProfileAvatarPreviewState>(null);
   const isAvatarPreviewOpen = !!avatarPreview;
@@ -43,12 +44,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { data: contacts } = useCollection<Contact>(contactsQuery);
   
   useEffect(() => {
+    if (consoleMessageLogged.current) return;
     console.log("%c👋 Hey there, curious genius!", "color: #2563eb; font-size: 20px; font-weight: bold;");
     console.log("%cYou just unlocked Secure Talk’s hidden console message 👀", "font-style: italic; font-size: 14px;");
-    console.log("We love curious minds like yours — people who explore beyond the UI.");
     console.log("\n%c🚀 Secure Talk is an open-source, privacy-first messenger built by students for the world.", "font-size: 14px;");
     console.log("If you’d like to contribute, join us on GitHub:\n🔗 https://github.com/jvdhussain026/secure_talk");
     console.log("\n%cP.S. – Curiosity is your superpower. Never lose it 💫", "font-weight: bold; font-size: 14px;");
+    consoleMessageLogged.current = true;
   }, []);
 
   React.useEffect(() => {
