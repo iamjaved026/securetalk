@@ -60,7 +60,6 @@ export function Sidebar({ open, onOpenChange }: SidebarProps) {
     { icon: Settings, label: 'Settings', href: '/settings', show: true },
     { icon: Info, label: 'About Us', href: '/about', show: true },
     { icon: Heart, label: 'Support Us', href: '/support', show: true },
-    { icon: Code, label: 'Developer', href: '/readme', show: true },
     { icon: Shield, label: 'Admin', href: '/admin', show: userProfile?.verified },
   ]
   
@@ -123,7 +122,7 @@ export function Sidebar({ open, onOpenChange }: SidebarProps) {
                             <span className="flex-1 font-medium">{item.label}</span>
                         </Link>
                     ) : (
-                         <button key={item.label} onClick={item.action} className={cn("flex items-center p-3 rounded-lg hover:bg-accent transition-colors text-foreground/80 w-full", item.label === 'Sign Out' && 'text-destructive')}>
+                         <button key={item.label} className={cn("flex items-center p-3 rounded-lg hover:bg-accent transition-colors text-foreground/80 w-full", item.label === 'Sign Out' && 'text-destructive')}>
                             <item.icon className={cn("h-6 w-6 mr-4", item.label === 'Sign Out' ? 'text-destructive' : 'text-primary')} />
                             <span className="flex-1 font-medium text-left">{item.label}</span>
                         </button>

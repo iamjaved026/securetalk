@@ -36,7 +36,6 @@ export default function SettingsPage() {
         { href: '/support', icon: Heart, title: 'Support Us' },
         { href: '/roadmap', icon: Map, title: 'Roadmap & Status' },
         { href: '/feedback', icon: MessageSquareWarning, title: 'Report / Feedback' },
-        { href: '/readme', icon: FileText, title: 'Developer README' },
     ];
 
   return (
