@@ -65,7 +65,7 @@ const WelcomeStep = ({ onNavigate, isSigningIn }: { onNavigate: (target: 'create
                 <ShieldCheck className="w-20 h-20 mb-6 text-primary drop-shadow-lg" />
                 <h1 className="text-4xl font-bold font-headline drop-shadow-md">You're All Set</h1>
                 <p className="mt-4 text-md text-muted-foreground max-w-md">
-                    Create a new account to begin, or recover a previous one.
+                    Create a new account to begin, or sign in to an existing one.
                 </p>
             </motion.div>
             <motion.div
@@ -80,7 +80,7 @@ const WelcomeStep = ({ onNavigate, isSigningIn }: { onNavigate: (target: 'create
                 </Button>
                  <Button size="lg" className="w-full" variant="outline" onClick={() => onNavigate('recover')} disabled={isSigningIn}>
                     <LogIn className="mr-2" />
-                    Recover Existing Account
+                    Sign In
                 </Button>
             </motion.div>
         </div>
@@ -306,12 +306,17 @@ const CreateAccountStep = ({ onNext, onBack, isSaving }: { onNext: (username: st
     );
 };
 
-const RecoverAccountStep = ({ onNext, onBack, isSaving }: { onNext: (username: string, password: string) => void; onBack: () => void; isSaving: boolean; }) => {
+const RecoverAccountStep = ({ onNext, onBack, isSaving }: { onNext: (username: string, password: string) => Promise<void>; onBack: () => void; isSaving: boolean; }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const { toast } = useToast();
     
+    const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, '');
+        setUsername(value);
+    };
+
     return (
         <div className="h-full w-full flex flex-col p-8 bg-background">
              <header className="shrink-0 -mx-4 -mt-4 mb-4">
@@ -320,13 +325,18 @@ const RecoverAccountStep = ({ onNext, onBack, isSaving }: { onNext: (username: s
                 </Button>
             </header>
              <div className="text-center shrink-0">
-                <h2 className="text-2xl font-bold mb-2 font-headline">Recover Your Account</h2>
-                <p className="text-muted-foreground mb-8">Enter your credentials to sign in.</p>
+                <div className="flex justify-center mb-6">
+                    <div className="p-4 bg-primary/10 rounded-full">
+                        <LogIn className="w-10 h-10 text-primary" />
+                    </div>
+                </div>
+                <h2 className="text-3xl font-bold mb-2 font-headline">Sign In</h2>
+                <p className="text-muted-foreground mb-8">Enter your credentials to access your account.</p>
             </div>
             <div className="flex-1 overflow-y-auto space-y-4">
                  <div className="space-y-2">
                     <Label htmlFor="recover-username">Username</Label>
-                    <Input id="recover-username" placeholder="e.g. javed_026" value={username} onChange={(e) => setUsername(e.target.value)} autoFocus />
+                    <Input id="recover-username" placeholder="e.g. javed_026" value={username} onChange={handleUsernameChange} autoFocus />
                 </div>
                  <div className="space-y-2">
                     <Label htmlFor="recover-password">Password</Label>
@@ -490,9 +500,11 @@ export function OnboardingFlow({ onComplete }: { onComplete: () => void }) {
         setIsSigningIn(true);
         const email = `${username.toLowerCase()}@secure-talk.app`;
         try {
+            // CRITICAL FIX: Await the sign-in process
             await signInWithEmailAndPassword(auth, email, password);
             toast({ title: 'Welcome back!' });
-            onComplete();
+            // onComplete will be called by the auth state listener in the main layout,
+            // which is the correct pattern. No need to call it here.
         } catch (error) {
             console.error("Sign in failed:", error);
             toast({ variant: 'destructive', title: 'Sign In Failed', description: 'Please check your username and password.'});
@@ -501,6 +513,14 @@ export function OnboardingFlow({ onComplete }: { onComplete: () => void }) {
         }
     };
     
+    // This effect listens for the user object to become available after sign-in/sign-up
+    // and then completes the onboarding flow.
+    useEffect(() => {
+        if (user) {
+            onComplete();
+        }
+    }, [user, onComplete]);
+
     const renderStep = () => {
         if (step === 0) {
             return <InitialWelcomeStep onNext={handleInitialNext} />;
