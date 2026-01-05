@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle, Shield, Zap, Heart, User, Sparkles, XCircle, DollarSign, Server, LoaderCircle, Construction, BadgeCheck, Users as UsersIcon } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Shield, Zap, Heart, User, Sparkles, XCircle, DollarSign, Server, LoaderCircle, Construction, BadgeCheck, Users as UsersIcon, Mail, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -221,6 +221,31 @@ export default function AboutUsPage() {
                     <p>The team is working behind the scenes!</p>
                   </div>
               )}
+            </CardContent>
+          </Card>
+
+           <Card>
+            <CardHeader>
+              <CardTitle>Contact Us</CardTitle>
+              <CardDescription>
+                Have a question, suggestion, or want to contribute? We'd love to hear from you.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <a href="mailto:jvdhussain2008@gmail.com" className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent">
+                <Mail className="h-6 w-6 text-primary" />
+                <div>
+                  <h3 className="font-semibold">Email</h3>
+                  <p className="text-sm text-muted-foreground">jvdhussain2008@gmail.com</p>
+                </div>
+              </a>
+              <a href="tel:+916207069013" className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent">
+                <Phone className="h-6 w-6 text-primary" />
+                <div>
+                  <h3 className="font-semibold">Phone</h3>
+                  <p className="text-sm text-muted-foreground">+91 6207069013</p>
+                </div>
+              </a>
             </CardContent>
           </Card>
           
