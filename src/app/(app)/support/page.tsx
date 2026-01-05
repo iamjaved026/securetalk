@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Heart, Coffee, Server, Zap } from 'lucide-react';
+import { ArrowLeft, Heart, Coffee, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -11,33 +11,16 @@ import { useToast } from '@/hooks/use-toast';
 export default function SupportUsPage() {
   const { toast } = useToast();
 
-  const handleDonationClick = (tier: string) => {
+  const handleCopyUPI = () => {
+    navigator.clipboard.writeText('6207069013@ptyes');
     toast({
-      title: "Thank you for your support!",
-      description: `The "${tier}" donation option is not yet implemented.`,
+      title: "UPI ID Copied!",
+      description: "You can now paste it into your favorite payment app.",
     });
   };
-
-  const donationTiers = [
-    {
-      icon: Coffee,
-      title: "Buy us a Coffee",
-      amount: "$5",
-      description: "A small but mighty boost to keep our developers energized.",
-    },
-    {
-      icon: Server,
-      title: "Sponsor a Server Day",
-      amount: "$20",
-      description: "Help cover our operational costs for a full day.",
-    },
-    {
-      icon: Zap,
-      title: "Sponsor a Feature",
-      amount: "$100",
-      description: "Directly contribute to the development of a new feature.",
-    },
-  ];
+  
+  const bmcLink = "https://buymeacoffee.com/iamjaved026";
+  const upiQrLink = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=upi://pay?pa=6207069013@ptyes";
 
   return (
     <div className="flex flex-col h-full bg-secondary/50 md:bg-card">
@@ -71,45 +54,41 @@ export default function SupportUsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Make a Contribution</CardTitle>
-            <CardDescription>Choose an amount or enter a custom one.</CardDescription>
+            <CardTitle>Buy me a Coffee</CardTitle>
+            <CardDescription>If you find this app useful, consider supporting its development. Every contribution is greatly appreciated!</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {donationTiers.map((tier, index) => (
-              <button
-                key={index}
-                className="w-full text-left p-4 border rounded-lg hover:bg-accent/50 transition-colors flex items-center gap-4"
-                onClick={() => handleDonationClick(tier.title)}
-              >
-                <tier.icon className="w-8 h-8 text-primary flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="font-semibold">{tier.title}</h3>
-                  <p className="text-sm text-muted-foreground">{tier.description}</p>
-                </div>
-                <span className="font-bold text-lg">{tier.amount}</span>
-              </button>
-            ))}
+          <CardContent>
+            <Button asChild className="w-full" size="lg">
+                <a href={bmcLink} target="_blank" rel="noopener noreferrer">
+                    <Coffee className="mr-2" />
+                    Buy me a Coffee
+                </a>
+            </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Crypto Donations</CardTitle>
-            <CardDescription>We also accept donations via cryptocurrency.</CardDescription>
+            <CardTitle>Donate via UPI (India)</CardTitle>
+            <CardDescription>Scan the QR code with any UPI-enabled app.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
             <Image
-              src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:bc1q..."
-              alt="Crypto Donation QR Code"
+              src={upiQrLink}
+              alt="UPI Donation QR Code"
               width={200}
               height={200}
-              className="rounded-lg"
+              className="rounded-lg border p-2"
               data-ai-hint="qr code"
             />
-            <p className="text-xs text-center text-muted-foreground">
-              This is a dummy QR code for UI purposes. Please do not send funds to this address.
-            </p>
-            <Button variant="outline">Copy Address</Button>
+            <div className='text-center'>
+                <p className="text-sm text-muted-foreground">Or copy the UPI ID:</p>
+                <p className="font-mono text-sm font-semibold">6207069013@ptyes</p>
+            </div>
+            <Button variant="outline" onClick={handleCopyUPI}>
+                <Wallet className="mr-2"/>
+                Copy UPI ID
+            </Button>
           </CardContent>
         </Card>
       </main>
