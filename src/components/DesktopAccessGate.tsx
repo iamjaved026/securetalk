@@ -109,7 +109,7 @@ export function DesktopAccessGate({ children }: { children: ReactNode }) {
               SecureTalk Web
             </h1>
             <p className="text-lg text-muted-foreground mb-6">Desktop Version in Development</p>
-            <p className="text-foreground/80 mb-8 max-w-lg mx-auto lg:mx-0">
+            <p className="text-white/80 mb-8 max-w-lg mx-auto lg:mx-0">
               The desktop experience is currently under construction and is not feature-complete. For the best experience, please use our mobile-optimized Progressive Web App (PWA).
             </p>
 
