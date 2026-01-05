@@ -50,7 +50,6 @@ export type Contact = {
   displayName?: string; // User-editable nickname
   avatar: string;
   language: string;
-  status?: 'online' | 'offline';
   bio?: string;
   verified?: boolean;
   liveTranslationEnabled?: boolean;

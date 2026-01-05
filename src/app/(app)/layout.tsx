@@ -71,23 +71,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     if (!user || !firestore) return;
     const userStatusFirestoreRef = doc(firestore, `users/${user.uid}`);
-    setDoc(userStatusFirestoreRef, {
-        status: 'online',
-        lastSeen: firestoreServerTimestamp()
-    }, { merge: true });
-    const handleBeforeUnload = () => {
+    
+    const updateLastSeen = () => {
         setDoc(userStatusFirestoreRef, {
-            status: 'offline',
             lastSeen: firestoreServerTimestamp()
         }, { merge: true });
     };
+
+    updateLastSeen(); // Initial update
+    
+    const handleBeforeUnload = () => {
+        updateLastSeen();
+    };
+    
+    // Update every 4 minutes while tab is active
+    const intervalId = setInterval(updateLastSeen, 4 * 60 * 1000); 
+
     window.addEventListener('beforeunload', handleBeforeUnload);
+    
     return () => {
+        clearInterval(intervalId);
         window.removeEventListener('beforeunload', handleBeforeUnload);
-         setDoc(userStatusFirestoreRef, {
-            status: 'offline',
-            lastSeen: firestoreServerTimestamp()
-        }, { merge: true });
+        updateLastSeen(); // Final update on unmount
     }
   }, [user, firestore]);
 

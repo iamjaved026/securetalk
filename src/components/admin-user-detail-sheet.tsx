@@ -3,7 +3,7 @@
 
 import { useState } from "react"
 import { Drawer } from "vaul"
-import { formatDistanceToNowStrict } from 'date-fns'
+import { formatDistanceToNowStrict, differenceInMinutes } from 'date-fns'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Copy, UserPlus, Calendar, Check, Info } from "lucide-react"
@@ -54,6 +54,8 @@ export function AdminUserDetailSheet({ open, onOpenChange, user, onConnect }: Ad
   
   const formattedDate = user.createdAt ? user.createdAt.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'}) : 'N/A';
   const lastSeenText = user.lastSeen ? formatDistanceToNowStrict(user.lastSeen.toDate(), { addSuffix: true }) : 'Never';
+  const isOnline = user.lastSeen && differenceInMinutes(new Date(), user.lastSeen.toDate()) < 5;
+
 
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange} snapPoints={[0.7, 1]} modal={true}>
@@ -73,11 +75,11 @@ export function AdminUserDetailSheet({ open, onOpenChange, user, onConnect }: Ad
                     </Avatar>
                      <div className={cn(
                         "absolute bottom-4 right-1 h-5 w-5 rounded-full border-4 border-card",
-                        user.status === 'online' ? "bg-green-500" : "bg-gray-400"
+                        isOnline ? "bg-green-500" : "bg-gray-400"
                       )} />
                   </div>
                   <h2 className="text-2xl font-bold">{user.name}</h2>
-                  <p className="text-muted-foreground capitalize">{user.status === 'online' ? 'Online' : `Last seen ${lastSeenText}`}</p>
+                  <p className="text-muted-foreground capitalize">{isOnline ? 'Online' : `Last seen ${lastSeenText}`}</p>
                 </div>
 
                 <div className="space-y-4 p-4 border-t">

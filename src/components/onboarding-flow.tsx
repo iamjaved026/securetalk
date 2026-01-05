@@ -445,6 +445,7 @@ export function OnboardingFlow({ onComplete }: { onComplete: () => void }) {
                 language: 'en',
                 lastConnection: null,
                 createdAt: serverTimestamp(),
+                lastSeen: serverTimestamp(),
             };
             batch.set(userRef, profileData);
 

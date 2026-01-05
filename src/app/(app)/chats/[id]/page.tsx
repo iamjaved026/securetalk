@@ -5,7 +5,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback, useContext } 
 import Link from 'next/link'
 import { ArrowLeft, Send, Plus, Mic, MoreVertical, Phone, Video, ChevronDown, BadgeCheck, X, FileText, Download, PlayCircle, VideoIcon, Music, File, Star, Search, BellOff, ChevronUp, Trash2, Pencil, Reply, Languages, LoaderCircle, Palette, ImageIcon, User, UserPlus, FileUp, ChevronLeft, ChevronRight, Radio, Shield, Info as InfoIcon, UserX, Users } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import { format, formatDistanceToNowStrict, differenceInMinutes, differenceInHours } from 'date-fns'
+import { format, formatDistanceToNowStrict, differenceInMinutes } from 'date-fns'
 import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, setDoc, deleteDoc, arrayUnion, increment, getDocs, writeBatch } from "firebase/firestore";
 import Image from 'next/image'
 import ReactMarkdown from 'react-markdown';
@@ -1415,21 +1415,15 @@ export default function ChatPage() {
 
   const getStatusText = () => {
     if (isGroupChat) {
-      const onlineMembers = allUsers
-        ? allUsers.filter((u) => group?.participants[u.id] && u.status === 'online').length
-        : 0;
-      const totalMembers = Object.values(group?.participants || {}).filter(
-        (v) => v
-      ).length;
-      return `${totalMembers} members, ${onlineMembers} online`;
+        const onlineMembers = allUsers
+            ? allUsers.filter(u => group?.participants[u.id] && u.lastSeen && differenceInMinutes(new Date(), u.lastSeen.toDate()) < 5).length
+            : 0;
+        const totalMembers = Object.values(group?.participants || {}).filter(v => v).length;
+        return `${totalMembers} members, ${onlineMembers} online`;
     }
 
     if (chat?.typing?.[contactId || '']) {
         return <span className="text-primary animate-pulse">Typing...</span>;
-    }
-
-    if (remoteUser?.status === 'online') {
-        return 'Active now';
     }
 
     if (remoteUser?.lastSeen) {
@@ -1438,7 +1432,6 @@ export default function ChatPage() {
         const diffMinutes = differenceInMinutes(now, lastSeenDate);
 
         if (diffMinutes < 1) return 'Active now';
-        if (diffMinutes <= 5) return 'Active a few minutes ago';
         return `Active ${formatDistanceToNowStrict(lastSeenDate, { addSuffix: true })}`;
     }
     

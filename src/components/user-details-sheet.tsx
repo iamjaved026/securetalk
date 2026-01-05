@@ -13,7 +13,7 @@ import { FileText, Link as LinkIcon, Download, PlayCircle, BadgeCheck, Image as 
 
 import type { Contact, Message } from "@/lib/types"
 import { Badge } from "./ui/badge"
-import { useFirebase, useDoc, useMemoFirebase } from "@/firebase"
+import { useFirebase } from "@/firebase"
 import { updateDocumentNonBlocking } from "@/firebase"
 import { doc } from 'firebase/firestore'
 import { Input } from "./ui/input"
@@ -86,20 +86,16 @@ export function UserDetailsSheet({ open, onOpenChange, contact, messages }: User
   }
 
   const statusText = React.useMemo(() => {
-    if (contact.status === 'online') {
-      return 'Active now';
-    }
     if (contact.lastSeen) {
         const lastSeenDate = contact.lastSeen.toDate();
         const now = new Date();
         const diffMinutes = differenceInMinutes(now, lastSeenDate);
 
         if (diffMinutes < 1) return 'Active now';
-        if (diffMinutes <= 5) return 'Active a few minutes ago';
         return `Active ${formatDistanceToNowStrict(lastSeenDate, { addSuffix: true })}`;
     }
     return 'Offline';
-  }, [contact.status, contact.lastSeen]);
+  }, [contact.lastSeen]);
 
   const sharedMedia = React.useMemo(() => {
     const images: string[] = [];
