@@ -107,9 +107,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             router.push(`/chats/${data.lastConnection}`);
             updateDoc(userDocRef, { lastConnection: null });
           }
-          if (data.incomingCall && data.incomingCall.from && !pathname.startsWith('/call')) {
-             router.push(`/call?contactId=${data.incomingCall.from}&type=${data.incomingCall.type}&status=incoming`);
-          }
         }
       });
       return () => unsubscribe();

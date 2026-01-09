@@ -1676,24 +1676,12 @@ export default function ChatPage() {
                     ) : (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="flex items-center gap-1 text-foreground hover:bg-accent hover:text-accent-foreground px-2 h-12 w-12">
+                            <Button variant="ghost" size="icon" className="flex items-center gap-1 text-foreground hover:bg-accent hover:text-accent-foreground px-2 h-12 w-12" onClick={() => setIsComingSoonOpen(true)}>
                                 <Phone className="h-6 w-6" />
                                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                 <span className="sr-only">Call</span>
                             </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                            <DropdownMenuItem asChild>
-                                <Link href={`/call?contactId=${contact?.id}&type=voice&status=outgoing`}>
-                                    <Phone className="mr-2 h-4 w-4" />
-                                    <span>Voice Call</span>
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => setIsComingSoonOpen(true)}>
-                                <Video className="mr-2 h-4 w-4" />
-                                <span>Video Call</span>
-                            </DropdownMenuItem>
-                            </DropdownMenuContent>
                         </DropdownMenu>
                     )}
 

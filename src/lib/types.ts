@@ -62,14 +62,7 @@ export type Contact = {
     timestamp: Timestamp;
     duration?: number;
   };
-  incomingCall?: {
-    from: string;
-    type: 'voice' | 'video';
-  } | null;
   lastConnection?: string | null;
-  // New fields for call state management
-  callStatus?: 'connected' | 'declined' | 'ended' | null;
-  callWith?: string | null; // UID of the person they are in a call with
   lastSeen?: Timestamp;
   receiveBroadcasts?: boolean;
   isPinned?: boolean;
