@@ -13,6 +13,14 @@ import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { ComingSoonDialog } from './coming-soon-dialog';
 
+declare global {
+  interface Window {
+    SecureTalkNative?: {
+      send: (type: string, payload: any) => void;
+    };
+  }
+}
+
 type CallDetailsSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -21,7 +29,19 @@ type CallDetailsSheetProps = {
 
 export function CallDetailsSheet({ open, onOpenChange, contact }: CallDetailsSheetProps) {
   const { toast } = useToast()
-  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
+
+  const handleCall = (type: 'voice' | 'video') => {
+    if (window.SecureTalkNative) {
+      window.SecureTalkNative.send('START_CALL', {
+        contactId: contact.id,
+        contactName: contact.name,
+        type: type,
+      });
+      onOpenChange(false);
+    } else {
+      alert('Calls are only available in the SecureTalk app.');
+    }
+  };
 
   if (!open) return null;
 
@@ -58,19 +78,16 @@ export function CallDetailsSheet({ open, onOpenChange, contact }: CallDetailsShe
           </div>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-3">
-          <Button size="lg" variant="outline" asChild>
-            <Link href={`/call?contactId=${contact.id}&type=voice&status=outgoing`}>
+          <Button size="lg" variant="outline" onClick={() => handleCall('voice')}>
                 <Phone className="mr-2" />
                 Voice Call
-            </Link>
           </Button>
-          <Button size="lg" onClick={() => setIsComingSoonOpen(true)}>
+          <Button size="lg" onClick={() => handleCall('video')}>
              <Video className="mr-2" />
              Video Call
           </Button>
         </div>
       </motion.div>
-      <ComingSoonDialog open={isComingSoonOpen} onOpenChange={setIsComingSoonOpen} />
     </>
   );
 }

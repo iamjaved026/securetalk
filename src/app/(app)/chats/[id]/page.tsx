@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import React, { useState, useRef, useEffect, useMemo, useCallback, useContext } from 'react'
@@ -55,6 +56,13 @@ import { MultiSelectFooter } from '@/components/multi-select-footer'
 import { GroupInfoSheet } from '@/components/group-info-sheet'
 import { AppContext } from '@/app/(app)/layout';
 
+declare global {
+  interface Window {
+    SecureTalkNative?: {
+      send: (type: string, payload: any) => void;
+    };
+  }
+}
 
 const LinkifiedText = ({ text, isSender }: { text: string; isSender: boolean; }) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -1194,6 +1202,18 @@ export default function ChatPage() {
     }
   }
 
+  const handleCall = (type: 'voice' | 'video') => {
+    if (window.SecureTalkNative) {
+      window.SecureTalkNative.send('START_CALL', {
+        contactId: contactId,
+        contactName: displayName,
+        type: type,
+      });
+    } else {
+      alert('Calls are only available in the SecureTalk app.');
+    }
+  };
+
   const triggerInboundTranslate = () => {
     // If already translated, show original
     if (selectedMessage && translatedMessages[selectedMessage.id]) {
@@ -1676,12 +1696,22 @@ export default function ChatPage() {
                     ) : (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="flex items-center gap-1 text-foreground hover:bg-accent hover:text-accent-foreground px-2 h-12 w-12" onClick={() => setIsComingSoonOpen(true)}>
+                            <Button variant="ghost" size="icon" className="flex items-center gap-1 text-foreground hover:bg-accent hover:text-accent-foreground px-2 h-12 w-12">
                                 <Phone className="h-6 w-6" />
                                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                 <span className="sr-only">Call</span>
                             </Button>
                             </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onSelect={() => handleCall('voice')}>
+                                    <Phone className="mr-2 h-4 w-4" />
+                                    Voice Call
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={() => handleCall('video')}>
+                                    <Video className="mr-2 h-4 w-4" />
+                                    Video Call
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
                         </DropdownMenu>
                     )}
 

@@ -26,10 +26,16 @@ import { LoaderCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ComingSoonDialog } from '@/components/coming-soon-dialog';
 
+declare global {
+  interface Window {
+    SecureTalkNative?: {
+      send: (type: string, payload: any) => void;
+    };
+  }
+}
 
 function CallItem({ contact }: { contact: Contact }) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
 
   const call = contact.call || {
       type: 'outgoing',
@@ -39,10 +45,14 @@ function CallItem({ contact }: { contact: Contact }) {
 
   const handleCallAgain = (e: React.MouseEvent, callType: 'voice' | 'video') => {
     e.stopPropagation();
-    if (callType === 'video') {
-      setIsComingSoonOpen(true);
+    if (window.SecureTalkNative) {
+      window.SecureTalkNative.send('START_CALL', {
+        contactId: contact.id,
+        contactName: contact.name,
+        type: callType,
+      });
     } else {
-       setIsSheetOpen(true);
+      alert('Calls are only available in the SecureTalk app.');
     }
   };
   
@@ -85,7 +95,6 @@ function CallItem({ contact }: { contact: Contact }) {
         </div>
       </div>
       <CallDetailsSheet open={isSheetOpen} onOpenChange={setIsSheetOpen} contact={contact} />
-      <ComingSoonDialog open={isComingSoonOpen} onOpenChange={setIsComingSoonOpen} />
     </>
   );
 }
