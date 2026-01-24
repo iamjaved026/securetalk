@@ -109,7 +109,7 @@ export default function GroupInvitePage() {
   };
   
   const filteredContacts = contacts?.filter(c => 
-    !c.isGroup && (c.displayName || c.name).toLowerCase().includes(searchQuery.toLowerCase())
+    !c.isGroup && ((c.displayName || c.name) || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (isGroupLoading) {
@@ -147,8 +147,8 @@ export default function GroupInvitePage() {
                     <Label>Share Invite Link</Label>
                     <div className="flex items-center gap-2 p-2 mt-1 bg-muted rounded-lg">
                         <Input readOnly value={inviteLink} className="bg-transparent border-0" />
-                        <Button variant="ghost" size="icon" onClick={handleCopyLink}><Copy className="w-5 h-5"/></Button>
-                        <Button size="icon" onClick={handleShare}><Share2 className="w-5 h-5"/></Button>
+                        <Button variant="ghost" size="icon" onClick={handleCopyLink}><Copy className="w-5 w-5"/></Button>
+                        <Button size="icon" onClick={handleShare}><Share2 className="w-5 w-5"/></Button>
                     </div>
                 </div>
             </CardContent>
@@ -177,8 +177,8 @@ export default function GroupInvitePage() {
                                   className={cn("w-full flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-accent", selectedContacts.includes(contact.id) && "bg-accent")}
                                 >
                                   <Avatar className="h-10 w-10 pointer-events-none">
-                                    <AvatarImage src={contact.avatar} alt={contact.name} />
-                                    <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
+                                    <AvatarImage src={contact.avatar} alt={contact.displayName || contact.name} />
+                                    <AvatarFallback>{(contact.displayName || contact.name || '?').charAt(0)}</AvatarFallback>
                                   </Avatar>
                                   <span className="flex-1 text-left font-medium pointer-events-none">{contact.displayName || contact.name}</span>
                                   <Checkbox checked={selectedContacts.includes(contact.id)} readOnly />
