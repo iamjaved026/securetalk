@@ -4,7 +4,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, LoaderCircle, Shield, Users, BadgeCheck, Copy, Check, Briefcase } from 'lucide-react';
+import { ArrowLeft, LoaderCircle, Shield, Users, BadgeCheck, Copy, Check, Briefcase, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
@@ -159,20 +159,36 @@ export default function AdminPage() {
         </Card>
 
         {adminProfile?.verified && (
-          <Card>
-            <CardHeader>
-                <CardTitle>Team Management</CardTitle>
-                <CardDescription>Manage users displayed on the 'About Us' page.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Button className="w-full" asChild>
-                    <Link href="/admin/team">
-                        <Briefcase className="mr-2"/>
-                        Manage Team
-                    </Link>
-                </Button>
-            </CardContent>
-          </Card>
+            <>
+            <Card>
+                <CardHeader>
+                    <CardTitle>App Updates</CardTitle>
+                    <CardDescription>Manage and publish release notes for all users.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button className="w-full" asChild>
+                        <Link href="/admin/update">
+                            <Megaphone className="mr-2"/>
+                            Publish Update
+                        </Link>
+                    </Button>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Team Management</CardTitle>
+                    <CardDescription>Manage users displayed on the 'About Us' page.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button className="w-full" asChild>
+                        <Link href="/admin/team">
+                            <Briefcase className="mr-2"/>
+                            Manage Team
+                        </Link>
+                    </Button>
+                </CardContent>
+            </Card>
+            </>
         )}
         
         <Card>

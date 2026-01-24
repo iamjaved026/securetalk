@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "User": {
@@ -196,6 +195,26 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "name", "ownerId", "participants", "createdAt"]
+    },
+    "AppUpdate": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "App Update",
+      "type": "object",
+      "description": "Represents a published application update with release notes.",
+      "properties": {
+        "version": { "type": "string" },
+        "title": { "type": "string" },
+        "features": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "bugFixes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "publishedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["version", "title", "publishedAt"]
     }
   },
   "auth": {
@@ -277,6 +296,14 @@
             "$ref": "#/backend/entities/TeamMember"
           },
           "description": "Page for managing team members."
+        }
+      },
+      {
+        "path": "app-info/latest",
+        "definition": {
+          "entityName": "AppUpdate",
+          "schema": { "$ref": "#/backend/entities/AppUpdate" },
+          "description": "Stores the details of the latest published app update."
         }
       }
     ]

@@ -2,13 +2,14 @@
 'use client'
 
 import React, { useState, useContext, useEffect, useRef } from 'react'
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase'
+import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase'
 import { doc, onSnapshot, updateDoc, collection, query, orderBy, Timestamp, limit, getDocs, serverTimestamp as firestoreServerTimestamp, setDoc } from 'firebase/firestore'
 import { useRouter, usePathname } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import type { Contact, Message } from '@/lib/types'
 import { playTone, tones } from '@/lib/audio'
 import { ProfileAvatarPreview, type ProfileAvatarPreviewState } from '@/components/profile-avatar-preview'
+import { UpdateDialog } from '@/components/update-dialog'
 
 // Create a context to share the avatar preview state
 export const AppContext = React.createContext<{
@@ -42,6 +43,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [firestore, user]);
 
   const { data: contacts } = useCollection<Contact>(contactsQuery);
+
+  const updateInfoRef = useMemoFirebase(() => firestore ? doc(firestore, 'app-info', 'latest') : null, [firestore]);
+  const { data: updateData, isLoading: isUpdateLoading } = useDoc<any>(updateInfoRef);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  
+  useEffect(() => {
+    if (updateData && !isUpdateLoading && user) {
+        const seenVersion = localStorage.getItem('seen_update_version');
+        if (seenVersion !== updateData.version) {
+            setShowUpdateDialog(true);
+        }
+    }
+  }, [updateData, isUpdateLoading, user]);
+
+  const handleCloseUpdateDialog = () => {
+      if(updateData) {
+          localStorage.setItem('seen_update_version', updateData.version);
+      }
+      setShowUpdateDialog(false);
+  };
   
   useEffect(() => {
     if (consoleMessageLogged.current) return;
@@ -170,6 +191,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               if (!isOpen) setAvatarPreview(null);
           }}
       />
+      {updateData && (
+         <UpdateDialog
+            open={showUpdateDialog}
+            onOpenChange={handleCloseUpdateDialog}
+            version={updateData.version}
+            title={updateData.title}
+            features={updateData.features}
+            bugFixes={updateData.bugFixes}
+         />
+      )}
     </AppContext.Provider>
   );
 }
