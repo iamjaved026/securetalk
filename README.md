@@ -1,11 +1,9 @@
 # Firebase Studio
 
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+This is a NextJS messenger app built with Firebase Studio.
 
 ## Repository
-New Repository: https://github.com/iamjaved026/securetalk.git
+GitHub: [https://github.com/iamjaved026/securetalk](https://github.com/iamjaved026/securetalk)
 
 ## Adding New AI Flows (Genkit)
 
