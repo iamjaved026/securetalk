@@ -66,7 +66,7 @@ export default function FeedbackPage() {
   };
 
   const socialLinks = [
-    { icon: Github, href: 'https://github.com/jvdhussain026/secure_talk', label: 'GitHub' },
+    { icon: Github, href: 'https://github.com/iamjaved026/securetalk', label: 'GitHub' },
     { icon: Instagram, href: 'https://www.instagram.com/secure_talk', label: 'Instagram' },
     { icon: Mail, href: 'mailto:jvdhussain2008@gmail.com', label: 'Email' },
   ];

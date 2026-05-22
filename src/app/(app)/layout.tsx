@@ -69,7 +69,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     console.log("%c👋 Hey there, curious genius!", "color: #2563eb; font-size: 20px; font-weight: bold;");
     console.log("%cYou just unlocked Secure Talk’s hidden console message 👀", "font-style: italic; font-size: 14px;");
     console.log("\n%c🚀 Secure Talk is an open-source, privacy-first messenger built by students for the world.", "font-size: 14px;");
-    console.log("If you’d like to contribute, join us on GitHub:\n🔗 https://github.com/jvdhussain026/secure_talk");
+    console.log("If you’d like to contribute, join us on GitHub:\n🔗 https://github.com/iamjaved026/securetalk");
     console.log("\n%cP.S. – Curiosity is your superpower. Never lose it 💫", "font-weight: bold; font-size: 14px;");
     consoleMessageLogged.current = true;
   }, []);

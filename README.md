@@ -4,6 +4,9 @@ This is a NextJS starter in Firebase Studio.
 
 To get started, take a look at src/app/page.tsx.
 
+## Repository
+New Repository: https://github.com/iamjaved026/securetalk.git
+
 ## Adding New AI Flows (Genkit)
 
 The AI functionality is organized in the `src/ai/` directory. To add a new flow (e.g., for summarizing text), follow these steps:
